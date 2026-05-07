@@ -146,6 +146,3 @@ def process(
         return complete_task(title_or_id)
     return None
 
-
-# Bandit вважає використання os.system небезпечним
-os.system("ls -la")
