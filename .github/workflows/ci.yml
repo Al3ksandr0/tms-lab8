@@ -1,0 +1,78 @@
+name: TMS CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.11'
+  MIN_COVERAGE: 75
+  PYLINT_MIN_SCORE: 7.0
+
+jobs:
+  # 1. СТАТИЧНИЙ АНАЛІЗ (Перший рубіж)
+  lint:
+    name: 'Lint & Static Analysis'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          
+      - name: Install linters
+        run: pip install flake8 pylint
+        
+      - name: Run flake8
+        run: flake8 src/ --max-line-length=100
+        
+      - name: Run pylint
+        # Впаде, якщо оцінка нижче 7.0
+        run: pylint src/ --fail-under=${{ env.PYLINT_MIN_SCORE }}
+
+  # 2. ТЕСТУВАННЯ (Запуститься ТІЛЬКИ якщо lint пройшов успішно)
+  test:
+    name: 'Unit Tests & Coverage'
+    runs-on: ubuntu-latest
+    needs: lint  # ЗАЛЕЖНІСТЬ ВІД LINT
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          
+      - name: Install dependencies
+        # Встановлюємо pytest і (якщо є) requirements.txt
+        run: |
+          pip install pytest pytest-cov
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          
+      - name: Run tests with coverage
+        # Впаде, якщо покриття нижче 75%
+        run: pytest --cov=src --cov-fail-under=${{ env.MIN_COVERAGE }}
+
+  # 3. БЕЗПЕКА (Запуститься паралельно з test, але ПІСЛЯ lint)
+  security:
+    name: 'Security Scan'
+    runs-on: ubuntu-latest
+    needs: lint  # ЗАЛЕЖНІСТЬ ВІД LINT
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Install bandit
+        run: pip install bandit
+        
+      - name: Run bandit
+        # -ll означає перевірку тільки HIGH та MEDIUM вразливостей
+        run: bandit -r src/ -ll -q
