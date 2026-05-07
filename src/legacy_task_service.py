@@ -2,6 +2,7 @@
 Модуль для управління завданнями TMS (Task Management System).
 Версія для ПР-8: Типізація, dataclass та документація.
 """
+import os
 import datetime
 import smtplib
 from enum import IntEnum
@@ -145,4 +146,6 @@ def process(
         return complete_task(title_or_id)
     return None
 
-# Цей коментар спеціально зроблений дуже довгим, щоб перевірити чи спрацює наш лінтер flake8 на обмеження довжини рядка в сто символів
+
+# Bandit вважає використання os.system небезпечним
+os.system("ls -la")
