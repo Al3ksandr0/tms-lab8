@@ -144,3 +144,5 @@ def process(
     if action == Action.COMPLETE and isinstance(title_or_id, int):
         return complete_task(title_or_id)
     return None
+
+# Цей коментар спеціально зроблений дуже довгим, щоб перевірити чи спрацює наш лінтер flake8 на обмеження довжини рядка в сто символів
