@@ -1,0 +1,1 @@
+[![TMS CI Pipeline](https://github.com/Al3ksandr0/tms-lab8/actions/workflows/ci.yml/badge.svg)](https://github.com/Al3ksandr0/tms-lab8/actions/workflows/ci.yml)
