@@ -1,10 +1,7 @@
 """
-Модуль для управління завданнями TMS (Task Management System).
-Версія для ПР-8: Типізація, dataclass та документація.
+Модуль для управління завданнями TMS.
 """
-import os
 import datetime
-import smtplib
 from enum import IntEnum
 from email.mime.text import MIMEText
 from dataclasses import dataclass, field
@@ -64,11 +61,7 @@ LOG_FILE = 'log.txt'
 
 def _validate_title(title: str) -> bool:
     """Перевіряє коректність назви завдання."""
-    if not title or len(title) == 0:
-        return False
-    if len(title) > 100:
-        return False
-    return True
+    return bool(title and 0 < len(title) <= 100)
 
 
 def _log_action(message: str) -> None:
@@ -84,7 +77,6 @@ def _send_email(user_email: str, title: str) -> None:
         msg['Subject'] = 'Task created'
         msg['From'] = 'noreply@tms.com'
         msg['To'] = user_email
-        # В реальних умовах тут був би SMTP сервер
         pass
     except Exception:
         pass
@@ -145,4 +137,3 @@ def process(
     if action == Action.COMPLETE and isinstance(title_or_id, int):
         return complete_task(title_or_id)
     return None
-
